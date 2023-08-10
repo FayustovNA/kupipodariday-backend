@@ -5,7 +5,7 @@ import { UpdateOfferDto } from './dto/update-offer.dto';
 
 @Controller('offers')
 export class OffersController {
-  constructor(private readonly offersService: OffersService) {}
+  constructor(private readonly offersService: OffersService) { }
 
   @Post()
   create(@Body() createOfferDto: CreateOfferDto) {
