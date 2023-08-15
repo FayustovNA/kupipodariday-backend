@@ -4,6 +4,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryFailedError } from 'typeorm';
 import { User } from './entities/user.entity';
+import { ServerException } from 'src/exceptions/server.exception';
+import { ErrorCode } from 'src/exceptions/error-codes';
+import { genSaltSync, hashSync } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -12,24 +15,36 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) { }
 
-
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async save(createUserDto: CreateUserDto) {
+    const hashedPassword = await this.hashPassword(createUserDto.password);
+    const user = await this.usersRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
+    return await this.usersRepository.save(user);
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findById(id: number) {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new ServerException(ErrorCode.UserNotFound);
+    }
+    return user;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findByMail(email: string) {
+    return this.usersRepository.findOneBy({ email });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  delete(id: number) {
+    return this.usersRepository.delete({ id });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  private hashPassword(password: string) {
+    return hashSync(password, genSaltSync(10))
   }
+
+  // update(id: number, updateUserDto: UpdateUserDto) {
+  //   return `This action updates a #${id} user`;
+  // }
 }

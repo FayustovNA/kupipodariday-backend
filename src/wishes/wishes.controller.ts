@@ -5,7 +5,7 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 
 @Controller('wishes')
 export class WishesController {
-  constructor(private readonly wishesService: WishesService) {}
+  constructor(private readonly wishesService: WishesService) { }
 
   @Post()
   create(@Body() createWishDto: CreateWishDto) {

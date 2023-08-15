@@ -9,7 +9,7 @@ import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Wish, Offer, Wishlist]),],
+    TypeOrmModule.forFeature([User, Wish, Offer, Wishlist])],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
