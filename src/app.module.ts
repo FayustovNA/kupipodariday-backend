@@ -10,33 +10,36 @@ import { User } from 'src/users/entities/user.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 import { Offer } from 'src/offers/entities/offer.entity';
-import { TokenModule } from './auth/token/token.module';
-import jwt from './configuration/jwt-config';
+import config from './configuration/configuration';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [jwt],
+      load: [config],
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'student',
-      password: 'student',
-      database: 'kupipodariday',
-      entities: [User, Offer, Wish, Wishlist],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('db_host'),
+        port: configService.get('db_port'),
+        username: configService.get('db_username'),
+        password: configService.get('db_password'),
+        database: configService.get('database'),
+        entities: [User, Offer, Wish, Wishlist],
+        synchronize: true,
+        logging: true,
+      }),
     }),
     UsersModule,
     WishesModule,
     WishlistsModule,
     OffersModule,
     AuthModule,
-    TokenModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

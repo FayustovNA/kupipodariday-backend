@@ -19,5 +19,4 @@ import { WishesModule } from 'src/wishes/wishes.module';
   providers: [OffersService],
   exports: [OffersService],
 })
-
-export class OffersModule { }
+export class OffersModule {}

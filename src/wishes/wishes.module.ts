@@ -17,5 +17,4 @@ import { UsersModule } from 'src/users/users.module';
   providers: [WishesService],
   exports: [WishesService],
 })
-
-export class WishesModule { }
+export class WishesModule {}

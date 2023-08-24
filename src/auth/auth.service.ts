@@ -1,36 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/users/entities/user.entity';
-import { compare } from 'bcrypt';
+import { compare, compareSync } from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
 import { ServerException } from 'src/exceptions/server.exception';
 import { ErrorCode } from 'src/exceptions/error-codes';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { SigninUserDto } from './dto/signin-user.dto';
 import { SigninUserResponseDto } from './dto/response/signin-user-response.dto';
-import { TokenService } from 'src/auth/token/token.service';
+import { SignupUserResponseDto } from './dto/response/signup-user-response.dto';
+import { User } from 'src/users/entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-    constructor(
-        private readonly usersService: UsersService,
-        private tokenService: TokenService,
-    ) { }
+  constructor(
+    private readonly usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
 
-    async signUpUser(dto: CreateUserDto): Promise<CreateUserDto> {
-        const existUser = await this.usersService.findByMail(dto.email)
-        if (existUser) throw new ServerException(ErrorCode.UserAlreadyExists);
-        return this.usersService.save(dto)
+  async auth(user: User): Promise<SigninUserResponseDto> {
+    const payload = { sub: user.id };
+    return { access_token: this.jwtService.sign(payload) };
+  }
+
+  async validatePassword(
+    username: string,
+    password: string,
+  ): Promise<SignupUserResponseDto> {
+    const user = await this.usersService.findByUsername(username);
+
+    if (!user) {
+      throw new ServerException(ErrorCode.IncorrectData);
     }
 
-    async signInUser(dto: SigninUserDto): Promise<SigninUserResponseDto> {
-        const existUser = await this.usersService.findByMail(dto.email)
-        if (!existUser) throw new ServerException(ErrorCode.UserNotFound);
+    const validatePassword = await compare(password, user.password);
 
-        const validatePassword = await compare(dto.password, existUser.password)
-        if (!validatePassword) throw new ServerException(ErrorCode.IncorrectData);
-
-        const token = await this.tokenService.generateJwtToken(dto.email);
-        return { ...existUser, token };
+    if (!validatePassword) {
+      throw new ServerException(ErrorCode.IncorrectData);
+    } else {
+      const { password, ...result } = user;
+      return result;
     }
+  }
 }
