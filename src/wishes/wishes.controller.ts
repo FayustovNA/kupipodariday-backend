@@ -19,7 +19,7 @@ import { PasswordWishInterceptor } from 'src/interceptors/password-wish.intercep
 
 @Controller('wishes')
 export class WishesController {
-  constructor(private readonly wishesService: WishesService) {}
+  constructor(private readonly wishesService: WishesService) { }
 
   @UseGuards(JwtGuard)
   @Post()

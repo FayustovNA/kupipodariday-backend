@@ -14,7 +14,7 @@ export class WishesService {
     private wishesRepository: Repository<Wish>,
     private usersService: UsersService,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async create(ownerId: number, createWishDto: CreateWishDto) {
     try {
