@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { OffersModule } from './offers/offers.module';
 import { UsersModule } from './users/users.module';
@@ -17,11 +17,14 @@ import config from './configuration/configuration';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
+      envFilePath: !process.env.NODE_ENV
+        ? '.env'
+        : `.env.${process.env.NODE_ENV}`
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
         type: 'postgres',
         host: configService.get('db_host'),
         port: configService.get('db_port'),
@@ -42,4 +45,4 @@ import config from './configuration/configuration';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
